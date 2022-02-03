@@ -1,74 +1,99 @@
 package com.cos.sercurity1.controller;
 
 
+import com.cos.sercurity1.config.auth.PrincipalDetails;
 import com.cos.sercurity1.model.User;
 import com.cos.sercurity1.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@Controller // View를 리턴하겠다.
+import java.util.Iterator;
+
+@Controller
 public class IndexController {
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    @Autowired
     private UserRepository userRepository;
 
-    @GetMapping({"", "/"})
-    public String index() {
-        // 머스테치 기본폴더 src/main/resources/
-        // 뷰리졸브 설정: templates (prefix),    .mustache(suffix)
-        return "index";   // src/main/resources/templates/index.mustache
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @GetMapping("/test/login")
+    public @ResponseBody String testLogin(Authentication authentication,
+                                          @AuthenticationPrincipal PrincipalDetails userDetails) { // DI(의존성 주입)
+        System.out.println("/test/login =========");
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        System.out.println("authentication : "+ principalDetails.getUser());
+
+        System.out.println("userDetails : " + userDetails.getUser());
+        return "세션 정보 화긴하ㅣ기";
+
+    }
+
+    @GetMapping("/test/oauth/login")
+    public @ResponseBody String testOAuthLogin(Authentication authentication,
+                                               @AuthenticationPrincipal OAuth2User oauth) { // DI(의존성 주입)
+        System.out.println("/test/oauth/login =========");
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        System.out.println("authentication : "+ oAuth2User.getAttributes());
+        System.out.println("oath2user : " + oauth.getAttributes());
+
+        return "세션 정보 화긴하ㅣ기";
+
+    }
+
+    @GetMapping({ "", "/" })
+    public @ResponseBody String index() {
+        return "인덱스 페이지입니다.";
     }
 
     @GetMapping("/user")
-    public @ResponseBody String user(){
+    public @ResponseBody String user() {
         return "user";
     }
 
     @GetMapping("/admin")
-    public @ResponseBody String admin(){
-        return "admin";
+    public @ResponseBody String admin() {
+        return "어드민 페이지입니다.";
     }
 
+    //@PostAuthorize("hasRole('ROLE_MANAGER')")
+    //@PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Secured("ROLE_MANAGER")
     @GetMapping("/manager")
-    public @ResponseBody String manager(){
-        return "manager";
+    public @ResponseBody String manager() {
+        return "매니저 페이지입니다.";
     }
 
-    //스프링시큐리티 해당주소를 낚아챈다.
-    @GetMapping("/loginForm")
-    public String loginForm(){
-        return "loginForm";
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
-    @GetMapping("/joinForm")
-    public String joinForm(){
-        return "joinForm";
+    @GetMapping("/join")
+    public String join() {
+        return "join";
     }
 
-
-    @PostMapping("/join")
-    public @ResponseBody String join(User user){
-        System.out.println(user);
-        user.setRole("ROLE_USER");
+    @PostMapping("/joinProc")
+    public String joinProc(User user) {
+        System.out.println("회원가입 진행 : " + user);
         String rawPassword = user.getPassword();
         String encPassword = bCryptPasswordEncoder.encode(rawPassword);
         user.setPassword(encPassword);
-        userRepository.save(user); // 회원가입 잘됨.
-        return "redirect:/loginForm";
+        user.setRole("ROLE_USER");
+        userRepository.save(user);
+        return "redirect:/";
     }
-
-    @GetMapping("/joinProc")
-    public @ResponseBody String joinProc(){
-        return "회원가입 완료됨!";
-    }
-
-
-
-
 }
