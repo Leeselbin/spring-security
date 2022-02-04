@@ -23,35 +23,12 @@ import java.util.Iterator;
 @Controller
 public class IndexController {
 
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @GetMapping("/test/login")
-    public @ResponseBody String testLogin(Authentication authentication,
-                                          @AuthenticationPrincipal PrincipalDetails userDetails) { // DI(의존성 주입)
-        System.out.println("/test/login =========");
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-        System.out.println("authentication : "+ principalDetails.getUser());
-
-        System.out.println("userDetails : " + userDetails.getUser());
-        return "세션 정보 화긴하ㅣ기";
-
-    }
-
-    @GetMapping("/test/oauth/login")
-    public @ResponseBody String testOAuthLogin(Authentication authentication,
-                                               @AuthenticationPrincipal OAuth2User oauth) { // DI(의존성 주입)
-        System.out.println("/test/oauth/login =========");
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        System.out.println("authentication : "+ oAuth2User.getAttributes());
-        System.out.println("oath2user : " + oauth.getAttributes());
-
-        return "세션 정보 화긴하ㅣ기";
-
-    }
 
     @GetMapping({ "", "/" })
     public @ResponseBody String index() {
@@ -59,8 +36,17 @@ public class IndexController {
     }
 
     @GetMapping("/user")
-    public @ResponseBody String user() {
-        return "user";
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principal) {
+        System.out.println("Principal : " + principal);
+        System.out.println("OAuth2 : "+principal.getUser().getProvider());
+        // iterator 순차 출력 해보기
+        Iterator<? extends GrantedAuthority> iter = principal.getAuthorities().iterator();
+        while (iter.hasNext()) {
+            GrantedAuthority auth = iter.next();
+            System.out.println(auth.getAuthority());
+        }
+
+        return "유저 페이지입니다.";
     }
 
     @GetMapping("/admin")
