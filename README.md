@@ -101,3 +101,23 @@ spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 - HMAC SHA256
 - 서버들이 여러개가 있을때 세션을 사용하지 않고 토큰검증만 하면되서 클라이언트 입장에서 막진입해도 상관이 없다.
 - 서버들이 secret키만 알고있으면 된다.
+
+## 세션방식
+
+- 세션 방식은 1. 다른 서버와의 연동(consistency)가 불가 하기 때문에 - 이유(서버마다 세션영역을 담당하는게 따로있고 메모리가 달라서 서로 호환이 불가 함.) 2. AJAX 방식이나 자바스크립트는 다른 서버의 IP는 호환 불가(쿠키 장난질도 불가)
+
+- 그래서 쓸 수있는 방식이
+
+1. Http Basic (매 요청시마다 id,password 를 헤더에 담고 가는것 -> 암호화 문제 때문에 Https 탄생 )
+2. Token Bearer (헤더,페이로드를 합친것에 암호화를 한 고유의 서명이 있고 암호화 방식이 있음.)
+
+### 쿠키 - 동일 도메인에서 요청이 올떄만 반응한다.
+
+# 시큐리티 필터 중요!!!
+
+- 기본적으로 Security Filter가 가장먼저 실행된다.
+- 사용자가 만든 필터는 항상 security filter보다 늦게실행된다.
+- 시큐리티 필터보다 먼저 실행되고 싶다면 - http.addFilterBefore(내가만든필터, BasicAuthenticationFilter.class); 선언하면된다.
+- SecurityFilterChain 에서 확인하면된다. BasicAuthenticationFilter 이것도 필터체인의 한스탭
+- 밑에 주소에서 확인해볼수 있다
+- https://velog.io/@sa833591/Spring-Security-5-Spring-Security-Filter-%EC%A0%81%EC%9A%A9
