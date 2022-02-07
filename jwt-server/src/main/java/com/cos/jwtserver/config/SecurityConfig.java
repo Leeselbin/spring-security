@@ -1,8 +1,10 @@
 package com.cos.jwtserver.config;
 
 import com.cos.jwtserver.config.jwt.jwtAuthenticationFilter;
+import com.cos.jwtserver.config.jwt.jwtAuthorizationFilter;
 import com.cos.jwtserver.filter.MyFilter1;
 import com.cos.jwtserver.filter.MyFilter3;
+import com.cos.jwtserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +24,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsFilter corsFilter;
 
+    private final UserRepository userRepository;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
@@ -32,12 +36,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable() // 매번 아이디 비번 날려줘서 보안떄문에 disable() 한다
                 .addFilter(new jwtAuthenticationFilter(authenticationManager()))  //AuthenticationManager를 던져줘야한다.
+                .addFilter(new jwtAuthorizationFilter(authenticationManager(), userRepository))
                 .authorizeRequests()
-                .antMatchers("api/v1/user/**")
+                .antMatchers("/api/v1/user/**")
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                .antMatchers("api/v1/manager/**")
+                .antMatchers("/api/v1/manager/**")
                 .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                .antMatchers("api/v1/admin/**")
+                .antMatchers("/api/v1/admin/**")
                 .access("hasRole('ROLE_ADMIN')")
                 .anyRequest().permitAll();
 
