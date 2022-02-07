@@ -1,3 +1,30 @@
+# Use Intelilj and maria DB , defendency
+
+- Spring security, Spring Web , Lombok , Jpa , Devtool
+
+```
+#build.gradle
+
+maria db
+	implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.3'
+	implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
+
+JWT
+    https://mvnrepository.com/artifact/com.auth0/java-jwt
+	implementation group: 'com.auth0', name: 'java-jwt', version: '3.10.2'
+```
+
+```
+#application.properties
+
+##maria DB
+spring.datasource.username= 마리아디비아이디
+spring.datasource.password= 비밀번호
+spring.datasource.url=jdbc:mariadb://localhost:3306/본인스키마
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+```
+
 # spring-security
 
 스프링 시큐리티 , gradle,springboot,
@@ -63,3 +90,14 @@
 - 신뢰성 X , ACK신경안쓰고 막보내도된다, 속도 빠르다
 
 02/04 ...
+
+---
+
+## JWT (Json Web Token)
+
+- 구성은 Header.Payload.signiture 로구성되어있고 각각 Base64로 암호화되어있다.
+- Base64로 디코딩이 가능. 암호화의 목적이아닌 서명의 목적이있다.
+- 데이터가 유효한지 무효한지에 무결성을 확인 목적.
+- HMAC SHA256
+- 서버들이 여러개가 있을때 세션을 사용하지 않고 토큰검증만 하면되서 클라이언트 입장에서 막진입해도 상관이 없다.
+- 서버들이 secret키만 알고있으면 된다.
